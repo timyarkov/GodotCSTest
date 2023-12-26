@@ -1,0 +1,45 @@
+[gd_scene load_steps=4 format=3 uid="uid://c4u726ibwahw5"]
+
+[ext_resource type="Script" path="res://src/player/Player.cs" id="1_b7klc"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_pla01"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vvik6"]
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_b7klc")
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(0.315, 0, 0, 0, 0.315, 0, 0, 0, 0.315, 0.253685, -0.116404, 0.222713)
+mesh = SubResource("SphereMesh_pla01")
+skeleton = NodePath("../MeshInstance3D2")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(0.731491, 0, 0, 0, 1, 0, 0, 0, 0.610966, 0, -0.149585, 0)
+mesh = SubResource("SphereMesh_pla01")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.483017, 0)
+mesh = SubResource("SphereMesh_pla01")
+skeleton = NodePath("")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(0.315, 0, 0, 0, 0.315, 0, 0, 0, 0.315, -0.256, -0.116, 0.223)
+mesh = SubResource("SphereMesh_pla01")
+skeleton = NodePath("../MeshInstance3D2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_vvik6")
+
+[node name="CameraRootNode" type="Node3D" parent="."]
+
+[node name="HorizontalPivot" type="Node3D" parent="CameraRootNode"]
+
+[node name="VerticalPivot" type="Node3D" parent="CameraRootNode/HorizontalPivot"]
+
+[node name="Camera3D" type="Camera3D" parent="CameraRootNode/HorizontalPivot/VerticalPivot"]
+transform = Transform3D(-1, 7.37613e-09, -1.50816e-07, 0, 0.998806, 0.0488498, 1.50996e-07, 0.0488498, -0.998806, 0, 0.924, -3.666)
+fov = 59.8
+size = 4.809
