@@ -3,6 +3,9 @@ using System;
 
 // Architecturally dunno if having the root node be the char is bestest but
 // avoids mess of getters so         y   a    g    n    i          ?
+
+// Camera stuffs handled by camera script, not player script 
+
 public partial class Player : CharacterBody3D
 {
 	// Properties
@@ -12,68 +15,25 @@ public partial class Player : CharacterBody3D
 	[Export]
 	public float JumpVelocity = 4.5f;
 
-	[Export]
-	public float CameraSensitivity = 0.01f;
-	// Private
-	private bool _mouseCaptured;
-
 	// Get the gravity from the project settings to be synced with RigidBody nodes.
 	public float gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
 
 	// Overrides
 	public override void _Ready()
 	{
-		CaptureMouse();
-		_mouseCaptured = true;
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (@event is InputEventMouseMotion && _mouseCaptured)
-		{
-			// https://murphysdad.substack.com/p/how-to-implement-a-simple-3rd-person
-			// Camera Movement
-			var relativePos = @event.Get("relative").As<Vector2>();
-			var rotation = relativePos * CameraSensitivity;
-
-			var horPivot = GetNode<Node3D>("CameraRootNode/HorizontalPivot");
-			horPivot.Rotate(Vector3.Down, rotation.X);
-
-			var vertPivot = GetNode<Node3D>("CameraRootNode/HorizontalPivot/VerticalPivot");
-			vertPivot.Rotate(Vector3.Right, rotation.Y);
-
-			// Stop up/down rotation if above/below
-			var rotationThreshold = 1.15f; // magic radians number that looks ok
-			var currVertRot = vertPivot.Get("rotation").As<Vector3>();
-			if (currVertRot.X > rotationThreshold)
-			{
-				vertPivot.Set("rotation", new Vector3(rotationThreshold, 0, 0));
-			}
-			else if (currVertRot.X < -rotationThreshold)
-			{
-				vertPivot.Set("rotation", new Vector3(-rotationThreshold, 0, 0));
-			}
-
-			//GD.Print(currVertRot);
-		}
+		// Don't collide player with camera
+		GetNode<SpringArm3D>("SpringArm3D").AddExcludedObject(GetRid());
 	}
 
 	public override void _Process(double delta)
 	{
-		// Capture/Uncapture Mouse
-		if (Input.IsActionJustPressed("mouse_capture_toggle"))
-		{
-			if (_mouseCaptured)
-			{
-				UnCaptureMouse();
-			}
-			else
-			{
-				CaptureMouse();
-			}
+		// Move camera spring arm so it moves with the player
+		var springArm = GetNode<SpringArm3D>("SpringArm3D");
+		springArm.Set("position", Get("position").As<Vector3>());
 
-			_mouseCaptured = !_mouseCaptured;
-		}
+		var t1 = springArm.Get("position").As<Vector3>();
+		var t2 = Get("position").As<Vector3>();
+		//GD.Print($"Spring: {t1.X} {t1.Y} {t1.Z} || char: {t2.X} {t2.Y} {t2.Z}");
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -89,20 +49,22 @@ public partial class Player : CharacterBody3D
 			velocity.Y = JumpVelocity;
 
 		// https://murphysdad.substack.com/p/how-to-implement-a-simple-3rd-person
+		// Exccceeeeeept since following https://www.youtube.com/watch?v=UpF7wm0186Q
+		// have to flip around left right forwards and backwards...math etc.
 		var direction = new Vector3
 		{
-			X = Input.GetActionStrength("move_left") - Input.GetActionStrength("move_right"),
-			Z = Input.GetActionStrength("move_forward") - Input.GetActionStrength("move_backward")
+			X = Input.GetActionStrength("move_right") - Input.GetActionStrength("move_left"),
+			Z = Input.GetActionStrength("move_backward") - Input.GetActionStrength("move_forward")
 		};
 		direction = direction.Normalized();
 
 		if (direction != Vector3.Zero)
 		{
-
 			// So that camera and model follows where camera faces
 			direction = direction.Rotated(
 				Vector3.Up,
-				GetNode<Node3D>("CameraRootNode/HorizontalPivot").Get("rotation").As<Vector3>().Y
+				//GetNode<Node3D>("CameraRootNode/HorizontalPivot").Get("rotation").As<Vector3>().Y
+				GetNode<Node3D>("SpringArm3D").Get("rotation").As<Vector3>().Y
 			);
 
 			velocity.X = direction.X * BaseSpeed;
@@ -120,16 +82,5 @@ public partial class Player : CharacterBody3D
 
 		Velocity = velocity;
 		MoveAndSlide();
-	}
-
-	// Util
-	public void CaptureMouse()
-	{
-		Input.MouseMode = Input.MouseModeEnum.Captured;
-	}
-
-	public void UnCaptureMouse()
-	{
-		Input.MouseMode = Input.MouseModeEnum.Visible;
 	}
 }

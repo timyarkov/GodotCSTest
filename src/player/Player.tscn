@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://c4u726ibwahw5"]
+[gd_scene load_steps=5 format=3 uid="uid://c4u726ibwahw5"]
 
 [ext_resource type="Script" path="res://src/player/Player.cs" id="1_b7klc"]
+[ext_resource type="Script" path="res://src/player/Camera.cs" id="2_y6mr5"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_pla01"]
 
@@ -39,7 +40,13 @@ shape = SubResource("CapsuleShape3D_vvik6")
 
 [node name="VerticalPivot" type="Node3D" parent="CameraRootNode/HorizontalPivot"]
 
-[node name="Camera3D" type="Camera3D" parent="CameraRootNode/HorizontalPivot/VerticalPivot"]
-transform = Transform3D(-1, 7.37613e-09, -1.50816e-07, 0, 0.998806, 0.0488498, 1.50996e-07, 0.0488498, -0.998806, 0, 0.924, -3.666)
+[node name="SpringArm3D" type="SpringArm3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00640023, -0.0110178, 0.0105295)
+spring_length = 7.0
+margin = 1.0
+script = ExtResource("2_y6mr5")
+CameraSensitivity = 0.1
+
+[node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
 fov = 59.8
 size = 4.809
