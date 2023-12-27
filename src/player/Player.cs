@@ -21,6 +21,8 @@ public partial class Player : CharacterBody3D
 	// maybe dodgy speeding up solution
 	private float _currSpeed = 0.0f;
 
+	private const float _turnWeight = 0.6f; // Magic business
+
 	// Get the gravity from the project settings to be synced with RigidBody nodes.
 	public float gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
 
@@ -86,9 +88,15 @@ public partial class Player : CharacterBody3D
 			};
 			velocity *= reductionVector;
 
+			// Make model face where going, smoothed out
 			var model = GetNode<Node3D>("Model");
-			model.LookAt(Get("global_position").As<Vector3>() - direction, Vector3.Up);
-			//model.LookAt(Get("translation").As<Vector3>() - direction, Vector3.Up);
+			// https://www.reddit.com/r/godot/comments/135xpya/comment/jilwihx/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+			// A bit yikes but basically set the global transformation to be if a transformation 
+			// of looking right in front of the current position, interpolated for smoooth 
+			model.GlobalTransform = model.GlobalTransform.InterpolateWith(
+				model.GlobalTransform.LookingAt(Get("global_position").As<Vector3>() - direction, Vector3.Up),
+				_turnWeight
+			);
 		}
 		else
 		{
