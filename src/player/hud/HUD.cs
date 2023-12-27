@@ -13,4 +13,10 @@ public partial class HUD : Control
 		Label speedLabel = GetNode<Label>("SpeedDisplay");
 		speedLabel.Text = $"SPEED: {Speed:N2}";
 	}
+
+	public void SetVelocityDisplay(Vector3 Velocity) {
+		GetNode<Label>("VelX").Text = $"VelX = {Velocity.X}";
+		GetNode<Label>("VelY").Text = $"VelY = {Velocity.Y}";
+		GetNode<Label>("VelZ").Text = $"VelZ = {Velocity.Z}";
+	}
 }

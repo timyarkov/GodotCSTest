@@ -13,7 +13,13 @@ public partial class Player : CharacterBody3D
 	public float BaseSpeed = 5.0f;
 
 	[Export]
+	public float Acceleration = 0.8f;
+
+	[Export]
 	public float JumpVelocity = 4.5f;
+
+	// maybe dodgy speeding up solution
+	private float _currSpeed = 0.0f;
 
 	// Get the gravity from the project settings to be synced with RigidBody nodes.
 	public float gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
@@ -70,6 +76,16 @@ public partial class Player : CharacterBody3D
 			velocity.X = direction.X * BaseSpeed;
 			velocity.Z = direction.Z * BaseSpeed;
 
+			_currSpeed = _currSpeed >= BaseSpeed ? BaseSpeed : _currSpeed + Acceleration;
+			var factor = _currSpeed / BaseSpeed;
+			var reductionVector = new Vector3
+			{
+				X = factor,
+				Y = 1,
+				Z = factor
+			};
+			velocity *= reductionVector;
+
 			var model = GetNode<Node3D>("Model");
 			model.LookAt(Get("global_position").As<Vector3>() - direction, Vector3.Up);
 			//model.LookAt(Get("translation").As<Vector3>() - direction, Vector3.Up);
@@ -78,6 +94,7 @@ public partial class Player : CharacterBody3D
 		{
 			velocity.X = Mathf.MoveToward(Velocity.X, 0, BaseSpeed);
 			velocity.Z = Mathf.MoveToward(Velocity.Z, 0, BaseSpeed);
+			_currSpeed = Mathf.MoveToward(_currSpeed, 0, Acceleration);
 		}
 
 		Velocity = velocity;

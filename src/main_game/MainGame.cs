@@ -16,6 +16,7 @@ public partial class MainGame : Node3D
 		HUD hud = GetNode<HUD>("Hud");
 		Player p = GetNode<Player>("Player");
 		hud.SetSpeedDisplay(p.Get("velocity").As<Vector3>().DistanceTo(Vector3.Zero));
+		hud.SetVelocityDisplay(p.Get("velocity").As<Vector3>());
 	}
 
 	// Some Ref but don't think needed in this case

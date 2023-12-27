@@ -28,3 +28,21 @@ theme_override_font_sizes/font_size = 33
 text = "SPEED: XX.XX%"
 horizontal_alignment = 2
 vertical_alignment = 2
+
+[node name="VelX" type="Label" parent="."]
+layout_mode = 0
+offset_right = 96.0
+offset_bottom = 23.0
+text = "VelX = XX.XX"
+
+[node name="VelY" type="Label" parent="."]
+offset_top = 24.875
+offset_right = 96.0
+offset_bottom = 47.875
+text = "VelY = XX.XX"
+
+[node name="VelZ" type="Label" parent="."]
+offset_top = 49.665
+offset_right = 96.0
+offset_bottom = 72.665
+text = "VelZ = XX.XX"
