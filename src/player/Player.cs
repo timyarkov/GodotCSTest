@@ -13,11 +13,15 @@ public partial class Player : CharacterBody3D
 	public float BaseSpeed = 5.0f;
 
 	[Export]
+	public float SprintMult = 1.5f;
+
+	[Export]
 	public float Acceleration = 0.8f;
 
 	[Export]
 	public float JumpVelocity = 4.5f;
 
+	private float _currMaxSpeed;
 	// maybe dodgy speeding up solution
 	private float _currSpeed = 0.0f;
 
@@ -31,6 +35,7 @@ public partial class Player : CharacterBody3D
 	{
 		// Don't collide player with camera
 		GetNode<SpringArm3D>("SpringArm3D").AddExcludedObject(GetRid());
+		_currMaxSpeed = BaseSpeed;
 	}
 
 	public override void _Process(double delta)
@@ -42,6 +47,19 @@ public partial class Player : CharacterBody3D
 		var t1 = springArm.Get("position").As<Vector3>();
 		var t2 = Get("position").As<Vector3>();
 		//GD.Print($"Spring: {t1.X} {t1.Y} {t1.Z} || char: {t2.X} {t2.Y} {t2.Z}");
+	}
+
+	public override void _Input(InputEvent @event)
+	{
+		// Sprinting
+		if (@event.IsActionPressed("sprint"))
+		{
+			_currMaxSpeed = BaseSpeed * SprintMult;
+		}
+		else if (@event.IsActionReleased("sprint"))
+		{
+			_currMaxSpeed = BaseSpeed;
+		}
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -75,11 +93,11 @@ public partial class Player : CharacterBody3D
 				GetNode<Node3D>("SpringArm3D").Get("rotation").As<Vector3>().Y
 			);
 
-			velocity.X = direction.X * BaseSpeed;
-			velocity.Z = direction.Z * BaseSpeed;
+			velocity.X = direction.X * _currMaxSpeed;
+			velocity.Z = direction.Z * _currMaxSpeed;
 
-			_currSpeed = _currSpeed >= BaseSpeed ? BaseSpeed : _currSpeed + Acceleration;
-			var factor = _currSpeed / BaseSpeed;
+			_currSpeed = _currSpeed >= _currMaxSpeed ? _currMaxSpeed : _currSpeed + Acceleration;
+			var factor = _currSpeed / _currMaxSpeed;
 			var reductionVector = new Vector3
 			{
 				X = factor,
@@ -100,8 +118,8 @@ public partial class Player : CharacterBody3D
 		}
 		else
 		{
-			velocity.X = Mathf.MoveToward(Velocity.X, 0, BaseSpeed);
-			velocity.Z = Mathf.MoveToward(Velocity.Z, 0, BaseSpeed);
+			velocity.X = Mathf.MoveToward(Velocity.X, 0, _currMaxSpeed);
+			velocity.Z = Mathf.MoveToward(Velocity.Z, 0, _currMaxSpeed);
 			_currSpeed = Mathf.MoveToward(_currSpeed, 0, Acceleration);
 		}
 
