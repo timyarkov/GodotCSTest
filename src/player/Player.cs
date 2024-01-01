@@ -21,6 +21,7 @@ public partial class Player : CharacterBody3D
 	[Export]
 	public float JumpVelocity = 4.5f;
 
+	private Camera _camera;
 	private float _currMaxSpeed;
 	// maybe dodgy speeding up solution
 	private float _currSpeed = 0.0f;
@@ -33,8 +34,10 @@ public partial class Player : CharacterBody3D
 	// Overrides
 	public override void _Ready()
 	{
+		_camera = GetNode<Camera>("SpringArm3D");
+
 		// Don't collide player with camera
-		GetNode<SpringArm3D>("SpringArm3D").AddExcludedObject(GetRid());
+		_camera.AddExcludedObject(GetRid());
 		_currMaxSpeed = BaseSpeed;
 	}
 
@@ -63,6 +66,13 @@ public partial class Player : CharacterBody3D
 	}
 
 	public override void _PhysicsProcess(double delta)
+	{
+		/* MOVEMENT */
+		_handleMovement(delta);
+		_handleActions();
+	}
+
+	private void _handleMovement(double delta)
 	{
 		Vector3 velocity = Velocity;
 
@@ -125,5 +135,23 @@ public partial class Player : CharacterBody3D
 
 		Velocity = velocity;
 		MoveAndSlide();
+	}
+
+	private void _handleActions()
+	{
+		if (Input.IsActionPressed("fire"))
+		{
+			var landingPos = _camera.GetAheadPoint();
+
+			GD.Print($"fire! x:{landingPos.X} y:{landingPos.Y} z:{landingPos.Z}");
+
+			// https://gamedevacademy.org/mesh-in-godot-complete-guide/#Creating_a_Basic_Mesh
+			var newMeshInst = new MeshInstance3D();
+			var sphereMesh = new SphereMesh();
+			newMeshInst.Mesh = sphereMesh;
+			newMeshInst.Position = landingPos;
+
+			GetTree().Root.AddChild(newMeshInst);
+		}
 	}
 }
